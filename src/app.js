@@ -1,5 +1,5 @@
+ // Configuracion express
 import express from 'express';
-import dbConnect from './config/db.js';
 
 const app = express();
 
@@ -15,21 +15,4 @@ app.get('/health', (req, res) => {
     });
 });
 
-
-// Inicio servidor
-const PORT = process.env.PORT;
-
-const startServer = async () => {
-    try {
-        await dbConnect();
-        app.listen(PORT, () => {
-            console.log(`Servidor en http://localhost:${PORT}`);
-            console.log(`API en http://localhost:${PORT}/api`);
-        });
-    } catch(error){
-        console.error('ERROR al iniciar: ', error);
-        process.exit(1);
-    }
-};
-
-startServer();
+export default app;
