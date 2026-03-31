@@ -78,6 +78,4 @@ userSchema.virtual("fullName").get(function () {
     return `${this.name} ${this.lastName}`.trim();
 });
 
-userSchema.index({ email: 1 }, { unique: true });
-
-export default moongoose.model("User", userSchema);
+export default mongoose.model("User", userSchema);

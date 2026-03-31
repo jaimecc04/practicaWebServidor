@@ -1,5 +1,6 @@
  // Configuracion express
 import express from 'express';
+import apiRouter from './routes/index.js';
 
 const app = express();
 
@@ -14,5 +15,8 @@ app.get('/health', (req, res) => {
         uptime: process.uptime()
     });
 });
+
+// Rutas
+app.use('/api', apiRouter);
 
 export default app;

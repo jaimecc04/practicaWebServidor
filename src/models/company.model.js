@@ -45,7 +45,4 @@ const companySchema = new mongoose.Schema({
     { timestamps: true }
 );
 
-
-companySchema.index({ name: 1 }, { unique: true });
-
 export default mongoose.model('Company', companySchema);

@@ -20,7 +20,7 @@ export const validate = (schema) => (req, res, next) => {
 
         next();
     } catch (error) {
-        const errors = error.errors.map(e => ({
+        const errors = error.issues.map(e => ({
             field: e.path.join('.'),
             message: e.message
         }));
@@ -44,7 +44,7 @@ export const validateBody = (schema) => (req, res, next) => {
         req.body = schema.parse(req.body);
         next();
     } catch (error) {
-        const errors = error.errors.map(e => ({
+        const errors = error.issues.map(e => ({
             field: e.path.join('.'),
             message: e.message
         }));
