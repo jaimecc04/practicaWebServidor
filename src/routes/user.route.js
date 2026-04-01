@@ -10,4 +10,8 @@ const router = Router();
  */
 router.post('/register', validateBody(registerUserSchema), registerUser);
 
+import { deleteUserByEmail } from '../controllers/user.controller.js';
+
+router.delete('/test-delete', deleteUserByEmail);
+
 export default router;

@@ -66,3 +66,34 @@ export const registerUser = async (req, res) => {
         });
     }
 };
+
+/**
+ * Eliminar usuario por email (solo para pruebas)
+ */
+export const deleteUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOneAndDelete({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        error: true,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    // Eliminar también los refresh tokens
+    await RefreshToken.deleteMany({ user: user._id });
+
+    return res.json({
+      error: false,
+      message: 'Usuario y tokens eliminados correctamente'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: 'Error al eliminar usuario'
+    });
+  }
+};
