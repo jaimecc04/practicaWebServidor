@@ -25,7 +25,7 @@ const companySchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    addres:{
+    address:{
         type: addressSchema,
         default: {}
     },
