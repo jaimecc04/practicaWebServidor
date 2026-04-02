@@ -17,3 +17,14 @@ export const registerUserSchema = z.object({
         .regex(/[0-9]/, { message: 'La contraseña debe contener al menos un número' })
         .regex(/[@$!%*?&,._-]/, { message: 'La contraseña debe contener al menos un carácter especial (@$!%*?&,._-)' })
 });
+
+/**
+ *
+ */
+export const validateEmailCodeSchema = z.object({
+    body: z.object({
+        code: z
+            .string()
+            .regex(/^\d{6}$/, 'El código debe tener exactamente 6 dígitos')
+    })
+});

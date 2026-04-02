@@ -2,6 +2,8 @@ import User from '../models/user.model.js';
 import RefreshToken from '../models/refreshToken.model.js';
 import { generateAccessToken, generateRefreshToken, getRefreshTokenExpiry } from '../utils/handleJwt.js';
 import { encrypt } from '../utils/handlePassword.js';
+import { AppError } from '../utils/AppError.js';
+import { th } from 'zod/v4/locales';
 
 /**
  * Registrar nuevo usuario.
@@ -66,6 +68,98 @@ export const registerUser = async (req, res) => {
         });
     }
 };
+
+/**
+ * Validar email del usuario
+ */
+export const validateUserEmail = async (req, res) => {
+  try {
+    const { code } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      const err = AppError.notFound('Usuario no encontrado', 'USER_NOT_FOUND');
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    if (user.status === 'verified') {
+      const err = AppError.badRequest(
+        'El usuario ya está verificado',
+        'USER_ALREADY_VERIFIED'
+      );
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    if (user.verificationAttempts <= 0) {
+      const err = AppError.tooManyRequests(
+        'Has agotado los intentos de verificación',
+        'NO_VERIFICATION_ATTEMPTS_LEFT'
+      );
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    if (user.verificationCode !== code) {
+      user.verificationAttempts -= 1;
+      await user.save();
+
+      if (user.verificationAttempts <= 0) {
+        const err = AppError.tooManyRequests(
+          'Has agotado los intentos de verificación',
+          'NO_VERIFICATION_ATTEMPTS_LEFT'
+        );
+        return res.status(err.statusCode).json({
+          error: true,
+          message: err.message,
+          code: err.code
+        });
+      }
+
+      const err = AppError.badRequest(
+        `Código incorrecto. Intentos restantes: ${user.verificationAttempts}`,
+        'INVALID_VERIFICATION_CODE'
+      );
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    user.status = 'verified';
+    user.verificationCode = null;
+    user.verificationAttempts = 0;
+    await user.save();
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Email validado correctamente'
+    });
+  } catch (error) {
+    console.error(error);
+
+    const err = AppError.internal('Error al validar el usuario');
+    return res.status(err.statusCode).json({
+      error: true,
+      message: err.message,
+      code: err.code
+    });
+  }
+};
+
+
+
 
 /**
  * Eliminar usuario por email (solo para pruebas)
