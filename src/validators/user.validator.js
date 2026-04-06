@@ -19,7 +19,7 @@ export const registerUserSchema = z.object({
 });
 
 /**
- *
+ * Schema de validación de la solicitud para enviar el código de verificación por email.
  */
 export const validateEmailCodeSchema = z.object({
     body: z.object({
@@ -27,4 +27,19 @@ export const validateEmailCodeSchema = z.object({
             .string()
             .regex(/^\d{6}$/, 'El código debe tener exactamente 6 dígitos')
     })
+});
+
+/**
+ * Schema de validación para el inicio de sesión de usuarios.
+ */
+export const loginUserSchema = z.object({
+  email: z
+    .string()
+    .email({ message: 'Email no válido' })
+    .trim()
+    .toLowerCase(),
+
+  password: z
+    .string()
+    .min(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
 });

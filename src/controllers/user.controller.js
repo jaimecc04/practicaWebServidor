@@ -3,7 +3,7 @@ import RefreshToken from '../models/refreshToken.model.js';
 import { generateAccessToken, generateRefreshToken, getRefreshTokenExpiry } from '../utils/handleJwt.js';
 import { encrypt } from '../utils/handlePassword.js';
 import { AppError } from '../utils/AppError.js';
-import { th } from 'zod/v4/locales';
+import { compare } from '../utils/handlePassword.js';
 
 /**
  * Registrar nuevo usuario.
@@ -158,7 +158,82 @@ export const validateUserEmail = async (req, res) => {
   }
 };
 
+/**
+ * Iniciar sesión de usuario.
+ */
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Buscar usuario por email incluyendo el campo de contraseña
+    const user = await User.findOne({ email }).select('+password');
 
+    if (!user) {
+      const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    // Comparar contraseña
+    const isPasswordValid = await compare(password, user.password);
+
+    if (!isPasswordValid) {
+      const err = AppError.unauthorized('Contraseña incorrecta', 'INVALID_PASSWORD');
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    // Comprobar si el usuario está verificado
+    if (user.status !== 'verified') {
+      const err = AppError.forbidden('El usuario no está verificado', 'USER_NOT_VERIFIED');
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    // Generar tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken();
+
+    // Guardar refresh token en BD
+    await RefreshToken.create({
+      token: refreshToken,
+      user: user._id,
+      expiresAt: getRefreshTokenExpiry(),
+      createdByIp: req.ip
+    });
+
+    // Ocultar la contraseña en la respuesta
+    user.set('password', undefined, { strict: false });
+
+    // Responder con tokens y datos del usuario
+    return res.json({
+      accessToken,
+      refreshToken,
+      user
+    });
+  } catch (error) {
+    console.error(error);
+
+    const err = AppError.internal('Error al iniciar sesión');
+    return res.status(err.statusCode).json({
+      error: true,
+      message: err.message,
+      code: err.code
+    });
+  }
+};
 
 
 /**
