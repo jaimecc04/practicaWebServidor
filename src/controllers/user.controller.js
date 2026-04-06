@@ -733,3 +733,54 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
+/**
+ * Cambiar cotraseña del usuario
+ */
+export const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user) {
+      const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    const isCurrentPasswordValid = await compare(currentPassword, user.password);
+
+    if (!isCurrentPasswordValid) {
+      const err = AppError.unauthorized('Contraseña actual incorrecta', 'INVALID_CURRENT_PASSWORD');
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    const hashedNewPassword = await encrypt(newPassword, 10);
+
+    user.password = hashedNewPassword;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: 'Contraseña actualizada correctamente'
+    });
+  } catch (error) {
+    const err = AppError.internal('Error al actualizar la contraseña', 'UPDATE_PASSWORD_ERROR');
+
+    return res.status(err.statusCode).json({
+      error: true,
+      message: err.message,
+      code: err.code
+    });
+  }
+};

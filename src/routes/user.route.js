@@ -9,7 +9,8 @@ import {
     updateCompanyOnboarding,
     uploadLogo,
     getUser,
-    deleteUser
+    deleteUser,
+    updatePassword
 } from '../controllers/user.controller.js';
 import { 
     registerUserSchema, 
@@ -17,7 +18,8 @@ import {
     loginUserSchema,
     refreshTokenSchema, 
     onboardingUserSchema,
-    companyOnboardingSchema
+    companyOnboardingSchema,
+    updatePasswordSchema
 } from '../validators/user.validator.js';
 import { validate, validateBody } from '../middleware/validate.middleware.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
@@ -47,5 +49,7 @@ router.patch('/logo', authMiddleware, checkUserHasCompany,uploadMiddleware.singl
 router.get('/', authMiddleware, getUser);
 // DELETE /api/user
 router.delete('/', authMiddleware, deleteUser);
+// PUT /api/user/password
+router.put('/password', authMiddleware, validateBody(updatePasswordSchema), updatePassword);
 
 export default router;

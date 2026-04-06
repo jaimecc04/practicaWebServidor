@@ -118,3 +118,16 @@ export const companyOnboardingSchema = z.object({
 }, {
     message: 'Si no es autónomo, el nombre, CIF y dirección de la empresa son obligatorios'
 });
+
+export const updatePasswordSchema = z.object({
+    currentPassword: z.string()
+    .min(8, 'La contraseña actual debe tener al menos 8 caracteres'),
+  newPassword: z.string()
+    .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
+}).refine(
+  (data) => data.currentPassword !== data.newPassword,
+  {
+    message: 'La nueva contraseña debe ser diferente de la actual',
+    path: ['newPassword']
+  }
+);
