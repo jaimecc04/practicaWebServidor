@@ -618,8 +618,37 @@ export const uploadLogo = async (req, res) => {
   }
 };
 
+/**
+ * Obtener datos del usuario autenticado
+*/
 
+export const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('company');
 
+    if(!user) {
+      const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    return res.json({
+      data: user
+    });
+  } catch (error) {
+    const err = AppError.internal('Error al obtener datos del usuario', 'GET_USER_ERROR');
+    
+    return res.status(err.statusCode).json({
+      error: true,
+      message: err.message,
+      code: err.code
+    });
+  }
+};
 
 /**
  * Eliminar usuario por email (solo para pruebas)

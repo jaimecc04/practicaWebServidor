@@ -7,7 +7,8 @@ import {
     logoutUser,
     updateUserOnboarding,
     updateCompanyOnboarding,
-    uploadLogo
+    uploadLogo,
+    getUser
 } from '../controllers/user.controller.js';
 import { 
     registerUserSchema, 
@@ -42,6 +43,10 @@ router.put('/register', authMiddleware, validateBody(onboardingUserSchema), upda
 router.patch('/company', authMiddleware, validateBody(companyOnboardingSchema), updateCompanyOnboarding);
 // PATCH /api/user/logo
 router.patch('/logo', authMiddleware, checkUserHasCompany,uploadMiddleware.single('logo'), uploadLogo);
+// GET /api/user
+router.get('/', authMiddleware, getUser);
+
+
 
 // DELETE /api/user/test-delete
 router.delete('/test-delete', deleteUserByEmail);
