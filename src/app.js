@@ -1,12 +1,38 @@
  // Configuracion express
 import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+
 import apiRouter from './routes/index.js';
 import { notFound, errorHandler } from './middleware/error.middleware.js';
+import { sanitizeBody } from './middleware/sanitize.middleware.js';
 
 const app = express();
 
+// Seguridad básica con Helmet
+app.use(helmet());
+
+// Rate limit global
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // Limitar a 100 solicitudes por IP por ventana
+    standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: true,
+    message: 'Demasiadas peticiones, inténtalo más tarde',
+    code: 'RATE_LIMIT'
+  }
+});
+
+app.use(limiter);
+
+// Parseo delbody
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
+
+// Middleware de sanitización
+app.use(sanitizeBody);
 
 // Health check
 app.get('/health', (req, res) => {
