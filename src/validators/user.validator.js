@@ -131,3 +131,36 @@ export const updatePasswordSchema = z.object({
     path: ['newPassword']
   }
 );
+
+export const inviteUserSchema = z.object({
+    email: z
+        .string()
+        .email({ message: 'El email no es válido' })
+        .toLowerCase()
+        .trim(),
+
+    password: z
+        .string()
+        .min(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+        .regex(/[A-Z]/, { message: 'La contraseña debe contener al menos una letra mayúscula' })
+        .regex(/[a-z]/, { message: 'La contraseña debe contener al menos una letra minúscula' })
+        .regex(/[0-9]/, { message: 'La contraseña debe contener al menos un número' })
+        .regex(/[@$!%*?&,._-]/, { message: 'La contraseña debe contener al menos un carácter especial (@$!%*?&,._-)' }),
+
+    name: z
+        .string()
+        .trim()
+        .min(1, { message: 'El nombre es requerido' }),
+
+    lastName: z
+        .string()
+        .trim()
+        .min(1, { message: 'El apellido es requerido' }),
+        
+    nif: z
+        .string()
+        .trim()
+        .length(9, { message: 'El NIF debe tener exactamente 9 caracteres' })
+        .regex(/^[0-9]{8}[A-Z]$/, { message: 'El NIF debe tener 8 dígitos seguidos de una letra' })
+        .transform((value) => value.toUpperCase()),
+});

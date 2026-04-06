@@ -6,8 +6,6 @@ import { encrypt } from '../utils/handlePassword.js';
 import { AppError } from '../utils/AppError.js';
 import { compare } from '../utils/handlePassword.js';
 import { notificationEmitter } from '../services/notification.service.js';
-import e from 'express';
-import { ca, id, th } from 'zod/v4/locales';
 
 /**
  * Registrar nuevo usuario.
@@ -776,6 +774,103 @@ export const updatePassword = async (req, res) => {
     });
   } catch (error) {
     const err = AppError.internal('Error al actualizar la contraseña', 'UPDATE_PASSWORD_ERROR');
+
+    return res.status(err.statusCode).json({
+      error: true,
+      message: err.message,
+      code: err.code
+    });
+  }
+};
+
+/**
+ * Invitar compañeros
+ */
+export const inviteUser = async (req, res) => {
+  try {
+    const { email, password, name, lastName, nif } = req.body;
+
+    // Solo admin puede invitar
+    if(req.user.role !== 'admin'){
+      const err = AppError.forbidden('No tienes permisos para invitar usuarios', 'FORBIDDEN');
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    // Debe tener compañía asociada
+    if (!req.user.company) {
+      const err = AppError.badRequest(
+        'El usuario no tiene una compañía asociada',
+        'USER_WITHOUT_COMPANY'
+      );
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    // No permitir emails repetidos
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      const err = AppError.conflict(
+        'Ya existe un usuario con ese email',
+        'EMAIL_ALREADY_EXISTS'
+      );
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    // Cifrar contraseña
+    const hashedPassword = await encrypt(password, 10);
+
+    // Generar código de verificación de 6 dígitos
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Crear usuario invitado
+    const invitedUser = await User.create({
+      email,
+      password: hashedPassword,
+      name,
+      lastName,
+      nif,
+      role: 'guest',
+      status: 'pending',
+      verificationCode,
+      verificationAttempts: 3,
+      company: req.user.company
+    });
+
+    // Emitir evento
+    notificationEmitter.emit('user:invited', {
+      email: invitedUser.email,
+      company: invitedUser.company,
+      invitedBy: req.user.email
+    });
+
+    return res.status(201).json({
+      message: 'Usuario invitado correctamente',
+      data: {
+        email: invitedUser.email,
+        role: invitedUser.role,
+        status: invitedUser.status,
+        company: invitedUser.company
+      }
+    });
+  } catch (error) {
+    console.log(error);
+
+    const err = AppError.internal('Error al invitar al usuario', 'INVITE_USER_ERROR');
 
     return res.status(err.statusCode).json({
       error: true,

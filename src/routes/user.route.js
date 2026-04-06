@@ -10,7 +10,8 @@ import {
     uploadLogo,
     getUser,
     deleteUser,
-    updatePassword
+    updatePassword,
+    inviteUser
 } from '../controllers/user.controller.js';
 import { 
     registerUserSchema, 
@@ -19,7 +20,8 @@ import {
     refreshTokenSchema, 
     onboardingUserSchema,
     companyOnboardingSchema,
-    updatePasswordSchema
+    updatePasswordSchema,
+    inviteUserSchema
 } from '../validators/user.validator.js';
 import { validate, validateBody } from '../middleware/validate.middleware.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
@@ -51,5 +53,7 @@ router.get('/', authMiddleware, getUser);
 router.delete('/', authMiddleware, deleteUser);
 // PUT /api/user/password
 router.put('/password', authMiddleware, validateBody(updatePasswordSchema), updatePassword);
+// POST /api/user/invite
+router.post('/invite', authMiddleware, validateBody(inviteUserSchema), inviteUser);
 
 export default router;

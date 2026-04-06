@@ -14,8 +14,7 @@ notificationEmitter.on('user:verified', (user) => {
 notificationEmitter.on('user:deleted', (user) => {
   console.log(`Usuario eliminado: ${user.email}`);
 });
-/*
+
 notificationEmitter.on('user:invited', (user) => {
   console.log(`Usuario invitado: ${user.email}`);
 });
-*/
