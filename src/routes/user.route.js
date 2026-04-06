@@ -17,7 +17,7 @@ router.post('/login', validateBody(loginUserSchema), loginUser);
 // POST /api/user/refresh
 router.post('/refresh', validateBody(refreshTokenSchema), refreshAccessToken);
 // POST /api/user/logout
-router.post('/logout', validateBody(refreshTokenSchema), logoutUser);
+router.post('/logout', authMiddleware, validateBody(refreshTokenSchema), logoutUser);
 
 // DELETE /api/user/test-delete
 router.delete('/test-delete', deleteUserByEmail);

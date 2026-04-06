@@ -168,8 +168,9 @@ export const loginUser = async (req, res) => {
     // Buscar usuario por email incluyendo el campo de contraseña
     const user = await User.findOne({ email }).select('+password');
 
+    // Verificar si el usuario existe 
     if (!user) {
-      const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
+      const err = AppError.unauthorized('Credenciales incorrectas', 'INVALID_CREDENTIALS');
 
       return res.status(err.statusCode).json({
         error: true,
@@ -182,7 +183,7 @@ export const loginUser = async (req, res) => {
     const isPasswordValid = await compare(password, user.password);
 
     if (!isPasswordValid) {
-      const err = AppError.unauthorized('Contraseña incorrecta', 'INVALID_PASSWORD');
+      const err = AppError.unauthorized('Credenciales incorrectas', 'INVALID_CREDENTIALS');
 
       return res.status(err.statusCode).json({
         error: true,
