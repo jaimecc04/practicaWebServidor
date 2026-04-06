@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { is } from 'zod/v4/locales';
 
 /**
  * Schema de validación para el registro de usuarios.
@@ -53,6 +54,9 @@ export const refreshTokenSchema = z.object({
         .min(1, { message: 'El refresh token es requerido' })
 });
 
+/**
+ * Schema de validación para completar el onboarding de usuario (actualizar datos)
+ */
 export const onboardingUserSchema = z.object({
     name: z
         .string()
@@ -70,4 +74,39 @@ export const onboardingUserSchema = z.object({
         .length(9, { message: 'El NIF debe tener exactamente 9 caracteres' })
         .regex(/^[0-9]{8}[A-Z]$/, { message: 'El NIF debe tener 8 dígitos seguidos de una letra' })
         .transform((value) => value.toUpperCase())
+});
+
+/**
+ * Schema de validación para el onboarding de empresa (actualizar datos de la empresa en el onboarding)
+ */
+
+export const companyOnboardingSchema = z.object({
+    name: z
+        .string()
+        .trim()
+        .min(1, { message: 'El nombre de la empresa es requerido' })
+        .optional(),
+
+    cif: z
+        .string()
+        .trim()
+        .min(1, { message: 'El CIF de la empresa es requerido' })
+        .optional(),
+
+    address: z.object({
+        street: z.string().trim().min(1, { message: 'La calle es requerida' }).optional(),
+        number: z.string().trim().min(1, { message: 'El número es requerido' }).optional(),
+        postal: z.string().trim().min(1, { message: 'El código postal es requerido' }).optional(),
+        city: z.string().trim().min(1, { message: 'La ciudad es requerida' }).optional(),
+        province: z.string().trim().min(1, { message: 'La provincia es requerida' }).optional()
+    }).optional(),
+    
+    isFreelance: z.boolean()
+}).refine((data) => {
+    // Si isFreelance es false, entonces name y cif son obligatorios
+    if (data.isFreelance) return true;
+
+    return !!data.name && !!data.cif && !!data.address;
+}, {
+    message: 'Si no es autónomo, el nombre, CIF y dirección de la empresa son obligatorios'
 });

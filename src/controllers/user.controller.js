@@ -1,4 +1,5 @@
 import User from '../models/user.model.js';
+import Company from '../models/company.model.js';
 import RefreshToken from '../models/refreshToken.model.js';
 import { generateAccessToken, generateRefreshToken, getRefreshTokenExpiry } from '../utils/handleJwt.js';
 import { encrypt } from '../utils/handlePassword.js';
@@ -391,6 +392,152 @@ export const updateUserOnboarding = async (req, res) => {
     }
 };
 
+/**
+ * Completar onboarding de empresa (actualizar datos de la empresa en el onboarding)
+ */
+export const updateCompanyOnboarding = async (req, res) => {
+  try {
+    const { name, cif, address, isFreelance } = req.body;
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+        const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
+        return res.status(err.statusCode).json({
+            error: true,
+            message: err.message,
+            code: err.code
+        });
+    }
+
+    // Usuario autónomo (freelance)
+    if(isFreelance) {
+      if(!user.nif || !user.name || !user.lastName) {
+        const err = AppError.badRequest('El usuario debe completar su onboarding personal primero', 'USER_ONBOARDING_INCOMPLETE');
+        
+        return res.status(err.statusCode).json({
+          error: true,
+          message: err.message,
+          code: err.code
+        });
+      }
+      
+      // Comprobar si ya existe una compañía de autónomo con el mismo NIF que el NIF del usuario
+      const existingFreelanceCompany = await Company.findOne({ cif: user.nif });
+
+      // Si ya existe una compañía de autónomo con el mismo NIF, asignar el usuario a esa compañía como guest
+      if(existingFreelanceCompany) {
+        user.company = existingFreelanceCompany._id;
+        user.role = 'guest';
+
+        await user.save();
+
+        return res.status(200).json({
+          message: 'Usuario unido a una compañía existente correctamente',
+          data: {
+            company: existingFreelanceCompany,
+            user: {
+              email: user.email,
+              role: user.role,
+              company: user.company
+            }
+          }
+        });
+      }
+      // Si no existe, crear una nueva compañía de autónomo con los datos del usuario y asignar el usuario a esa compañía como admin
+      const freelanceCompany = await Company.create({
+        owner: user._id,
+        name: `${user.name} ${user.lastName}`.trim(),
+        cif: user.nif,
+        address: user.address || {},
+        isFreelance: true
+      });
+
+      user.company = freelanceCompany._id;
+      user.role = 'admin';
+
+      await user.save();
+
+      return res.status(200).json({
+        message: 'Compañía de autónomo creada orrectamente',
+        data: {
+          company: freelanceCompany,
+          user: {
+            email: user.email,
+            role: user.role,
+            company: user.company
+          }
+        }
+      });
+    } 
+
+    // Empresa ya existente
+    const existingCompany = await Company.findOne({ cif });
+
+    if(existingCompany) {
+      user.company = existingCompany._id;
+      user.role = 'guest';
+
+      await user.save();
+
+      return res.status(200).json({
+        message: 'Usuario unido a una compañía existente correctamente',
+        data: {
+          company: existingCompany,
+          user: {
+            email: user.email,
+            role: user.role,
+            company: user.company
+          }
+        }
+      });
+    }
+
+    // Empresa nueva
+    const newCompany = await Company.create({
+      owner: user._id,
+      name,
+      cif,
+      address,
+      isFreelance: false
+    });
+
+    user.company = newCompany._id;
+    user.role = 'admin';
+
+    await user.save();
+
+    return res.status(200).json({
+      message: 'Compañía creada correctamente',
+      data: {
+        company: newCompany,
+        user: {
+          email: user.email,
+          role: user.role,
+          company: user.company
+        }
+      }
+    });
+  } catch (error) {
+    console.error(error);
+
+    // Manejar error de clave duplicada (código 11000) al crear una compañía con un CIF que ya existe
+    if (error.code === 11000) {
+      return res.status(409).json({
+        error: true,
+        message: 'Ya existe una compañía con ese CIF',
+        code: 'COMPANY_ALREADY_EXISTS'
+      });
+    }
+
+    const err = AppError.internal('Error al actualizar la compañía del usuario');
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+};
 
 
 
