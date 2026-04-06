@@ -52,3 +52,22 @@ export const refreshTokenSchema = z.object({
         .string()
         .min(1, { message: 'El refresh token es requerido' })
 });
+
+export const onboardingUserSchema = z.object({
+    name: z
+        .string()
+        .trim()
+        .min(1, { message: 'El nombre es requerido' }),
+
+    lastName: z
+        .string()
+        .trim()
+        .min(1, { message: 'El apellido es requerido' }),
+        
+    nif: z
+        .string()
+        .trim()
+        .length(9, { message: 'El NIF debe tener exactamente 9 caracteres' })
+        .regex(/^[0-9]{8}[A-Z]$/, { message: 'El NIF debe tener 8 dígitos seguidos de una letra' })
+        .transform((value) => value.toUpperCase())
+});

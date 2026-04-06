@@ -343,6 +343,55 @@ export const logoutUser = async (req, res) => {
     }
 };
 
+/**
+ * Completar onboarding de usuario (actualizar datos)
+ */
+export const updateUserOnboarding = async (req, res) => {
+    try {
+      const { name, lastName, nif } = req.body;
+
+      // Usuario viene del authMiddleware, por lo que req.user._id es el ID del usuario autenticado
+      const user = await User.findById(req.user._id);
+
+      if (!user) {
+          const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
+          return res.status(err.statusCode).json({
+              error: true,
+              message: err.message,
+              code: err.code
+          });
+      }
+
+      // Actualizar datos del usuario
+      user.name = name;
+      user.lastName = lastName;
+      user.nif = nif;
+      await user.save();
+
+      return res.json({
+          message: 'Onboarding completado correctamente',
+          data: {
+            email: user.email,
+            name: user.name,
+            lastName: user.lastName,
+            nif: user.nif,
+            role: user.role,
+            status: user.status
+          }
+      });
+    } catch (error) {
+        console.error(error);
+
+        const err = AppError.internal('Error al completar onboarding');
+        return res.status(err.statusCode).json({
+            error: true,
+            message: err.message,
+            code: err.code
+        });
+    }
+};
+
+
 
 
 /**

@@ -1,6 +1,18 @@
 import { Router } from 'express';
-import { registerUser, validateUserEmail, loginUser, refreshAccessToken, logoutUser } from '../controllers/user.controller.js';
-import { registerUserSchema, validateEmailCodeSchema, loginUserSchema, refreshTokenSchema } from '../validators/user.validator.js';
+import { 
+    registerUser, 
+    validateUserEmail, 
+    loginUser, 
+    refreshAccessToken, 
+    logoutUser,
+    updateUserOnboarding
+    } from '../controllers/user.controller.js';
+import { 
+    registerUserSchema, 
+    validateEmailCodeSchema, 
+    loginUserSchema,
+    refreshTokenSchema, 
+    onboardingUserSchema } from '../validators/user.validator.js';
 import { validate, validateBody } from '../middleware/validate.middleware.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 
@@ -18,6 +30,8 @@ router.post('/login', validateBody(loginUserSchema), loginUser);
 router.post('/refresh', validateBody(refreshTokenSchema), refreshAccessToken);
 // POST /api/user/logout
 router.post('/logout', authMiddleware, validateBody(refreshTokenSchema), logoutUser);
+// PUT /api/user/register
+router.put('/register', authMiddleware, validateBody(onboardingUserSchema), updateUserOnboarding);
 
 // DELETE /api/user/test-delete
 router.delete('/test-delete', deleteUserByEmail);
