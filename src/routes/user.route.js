@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { registerUser, validateUserEmail, loginUser } from '../controllers/user.controller.js';
-import { registerUserSchema, validateEmailCodeSchema, loginUserSchema } from '../validators/user.validator.js';
+import { registerUser, validateUserEmail, loginUser, refreshAccessToken } from '../controllers/user.controller.js';
+import { registerUserSchema, validateEmailCodeSchema, loginUserSchema, refreshTokenSchema } from '../validators/user.validator.js';
 import { validate, validateBody } from '../middleware/validate.middleware.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 
@@ -14,6 +14,8 @@ router.post('/register', validateBody(registerUserSchema), registerUser);
 router.put('/validation', authMiddleware, validate(validateEmailCodeSchema), validateUserEmail);
 // POST /api/user/login
 router.post('/login', validateBody(loginUserSchema), loginUser);
+// POST /api/user/refresh
+router.post('/refresh', validateBody(refreshTokenSchema), refreshAccessToken);
 
 
 // DELETE /api/user/test-delete

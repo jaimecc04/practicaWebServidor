@@ -43,3 +43,12 @@ export const loginUserSchema = z.object({
     .string()
     .min(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
 });
+
+/**
+ * Schema de validación para la solicitud de refresh token.s
+ */
+export const refreshTokenSchema = z.object({
+    refreshToken: z 
+        .string()
+        .min(1, { message: 'El refresh token es requerido' })
+});

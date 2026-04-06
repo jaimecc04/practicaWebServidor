@@ -235,6 +235,78 @@ export const loginUser = async (req, res) => {
   }
 };
 
+/**
+ * Refrescar token de acceso.
+
+ */
+export const refreshAccessToken = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if(!refreshToken) {
+            const err = AppError.badRequest('Refresh token es requerido', 'REFRESH_TOKEN_REQUIRED');
+
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
+        }
+
+        const storedToken = await RefreshToken.findOne({ token: refreshToken }).populate('user');
+
+        if (!storedToken) {
+            const err = AppError.unauthorized('Refresh token no válido', 'INVALID_REFRESH_TOKEN');
+
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
+        }
+
+        // Token revocado o expirado
+        if (!storedToken.isActive()) {
+            const err = AppError.unauthorized('Refresh token no válido o expirado', 'INVALID_OR_EXPIRED_REFRESH_TOKEN');
+
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
+        }
+
+        if(!storedToken.user) {
+            const err = AppError.notFound('Usuario no encontrado para el refresh token', 'USER_NOT_FOUND');
+
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
+        }
+
+        const accessToken = generateAccessToken(storedToken.user);
+
+        return res.json({
+            accessToken
+        });
+    } catch (error) {
+        console.error(error);
+
+        const err = AppError.internal('Error al refrescar token de acceso');
+        return res.status(err.statusCode).json({
+            error: true,
+            message: err.message,
+            code: err.code
+        });
+    }
+};
+
+
+
+
+
 
 /**
  * Eliminar usuario por email (solo para pruebas)
