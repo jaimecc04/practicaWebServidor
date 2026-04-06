@@ -656,11 +656,6 @@ export const getUser = async (req, res) => {
   try {
     const { soft } = req.query;
 
-    console.log('--- DELETE USER ---');
-    console.log('req.query.soft:', soft);
-    console.log('req.user:', req.user);
-    console.log('req.user._id:', req.user?._id);
-
     let user = null;
 
     // Soft delete
@@ -673,8 +668,6 @@ export const getUser = async (req, res) => {
         },
         { returnDocument: 'after' }
       );
-
-      console.log('Usuario tras soft delete:', user);
 
       if (!user) {
         const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
@@ -704,12 +697,9 @@ export const getUser = async (req, res) => {
     }
 
     // Comprobación previa hard delete
-    const existingUser = await User.findById(req.user._id);
-    console.log('Usuario encontrado antes del hard delete:', existingUser);
 
     // Hard delete
     user = await User.findByIdAndDelete(req.user._id);
-    console.log('Usuario eliminado en hard delete:', user);
 
     if (!user) {
       const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
@@ -735,8 +725,6 @@ export const getUser = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
-
     const err = AppError.internal('Error al eliminar el usuario', 'DELETE_USER_ERROR');
 
     return res.status(err.statusCode).json({
