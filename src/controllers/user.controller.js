@@ -6,6 +6,8 @@ import { encrypt } from '../utils/handlePassword.js';
 import { AppError } from '../utils/AppError.js';
 import { compare } from '../utils/handlePassword.js';
 import { notificationEmitter } from '../services/notification.service.js';
+import e from 'express';
+import { th } from 'zod/v4/locales';
 
 /**
  * Registrar nuevo usuario.
@@ -553,6 +555,69 @@ export const updateCompanyOnboarding = async (req, res) => {
       });
     }
 };
+
+
+/**
+ * Subir logo de la empresa (solo para usuarios admin)
+ */
+export const uploadLogo = async (req, res) => {
+  try {
+    if(!req.file) {
+      const err = AppError.badRequest('Archivo de logo es requerido', 'LOGO_FILE_REQUIRED');
+      
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    if(!req.user.company) {
+      const err = AppError.badRequest('El usuario no pertenece a ninguna compañía', 'USER_NO_COMPANY');
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    // Buscar la compañía
+    const company = await Company.findById(req.user.company);
+
+    if(!company) {
+      const err = AppError.notFound('Compañía', 'COMPANY_NOT_FOUND');
+      
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    const { filename } = req.file;
+
+    company.logo = `/uploads/${filename}`;
+
+    await company.save(); 
+
+    res.status(200).json({
+      message: 'Logo subido correctamente',
+      data: {
+        logo: company.logo
+      }
+    });
+  } catch (error) {
+    console.error(error)
+    const err = AppError.internal('Error al subir el logo de la compañía', 'LOGO_UPLOAD_ERROR');
+    
+    return res.status(err.statusCode).json({
+      error: true,
+      message: err.message,
+      code: err.code
+    });
+  }
+};
+
 
 
 

@@ -2,6 +2,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { join } from 'node:path';
 
 import apiRouter from './routes/index.js';
 import { notFound, errorHandler } from './middleware/error.middleware.js';
@@ -33,6 +34,9 @@ app.use(express.urlencoded({ extended: true}));
 
 // Middleware de sanitización
 app.use(sanitizeBody);
+
+// Archivo estáticos
+app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
 // Health check
 app.get('/health', (req, res) => {

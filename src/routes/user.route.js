@@ -6,7 +6,8 @@ import {
     refreshAccessToken, 
     logoutUser,
     updateUserOnboarding,
-    updateCompanyOnboarding
+    updateCompanyOnboarding,
+    uploadLogo
 } from '../controllers/user.controller.js';
 import { 
     registerUserSchema, 
@@ -18,6 +19,8 @@ import {
 } from '../validators/user.validator.js';
 import { validate, validateBody } from '../middleware/validate.middleware.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
+import uploadMiddleware from '../middleware/upload.middleware.js';
+import { checkUserHasCompany } from '../middleware/company.middleware.js';
 
 import { deleteUserByEmail } from '../controllers/user.controller.js';
 
@@ -37,8 +40,8 @@ router.post('/logout', authMiddleware, validateBody(refreshTokenSchema), logoutU
 router.put('/register', authMiddleware, validateBody(onboardingUserSchema), updateUserOnboarding);
 // PATCH /api/user/company
 router.patch('/company', authMiddleware, validateBody(companyOnboardingSchema), updateCompanyOnboarding);
-
-
+// PATCH /api/user/logo
+router.patch('/logo', authMiddleware, checkUserHasCompany,uploadMiddleware.single('logo'), uploadLogo);
 
 // DELETE /api/user/test-delete
 router.delete('/test-delete', deleteUserByEmail);
