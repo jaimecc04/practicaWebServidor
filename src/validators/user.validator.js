@@ -45,7 +45,7 @@ export const loginUserSchema = z.object({
 });
 
 /**
- * Schema de validación para la solicitud de refresh token.s
+ * Schema de validación para la solicitud de refresh token. También se utiliza en el logout para revocar el token de refresh.
  */
 export const refreshTokenSchema = z.object({
     refreshToken: z 

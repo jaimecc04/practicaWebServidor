@@ -303,8 +303,44 @@ export const refreshAccessToken = async (req, res) => {
     }
 };
 
+/**
+ * logout de usuario (revocar refresh token)
+ */
+export const logoutUser = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
 
+        const storedToken = await RefreshToken.findOne({ token: refreshToken });
 
+        if(!storedToken) {
+            const err = AppError.notFound('Refresh token no encontrado', 'REFRESH_TOKEN_NOT_FOUND');
+
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
+        }
+
+        // Revocar el token
+        storedToken.revokedAt = new Date();
+        storedToken.revokedByIp = req.ip;
+        await storedToken.save();
+
+        return res.json({
+            message: 'Logout realizado correctamente'
+        });
+    } catch (error) {
+        console.error(error);
+
+        const err = AppError.internal('Error al cerrar sesión');
+        return res.status(err.statusCode).json({
+            error: true,
+            message: err.message,
+            code: err.code
+        });
+    }
+};
 
 
 
