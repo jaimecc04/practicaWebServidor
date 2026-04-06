@@ -73,7 +73,15 @@ export const onboardingUserSchema = z.object({
         .trim()
         .length(9, { message: 'El NIF debe tener exactamente 9 caracteres' })
         .regex(/^[0-9]{8}[A-Z]$/, { message: 'El NIF debe tener 8 dígitos seguidos de una letra' })
-        .transform((value) => value.toUpperCase())
+        .transform((value) => value.toUpperCase()),
+        
+    address: z.object({
+        street: z.string().trim().min(1, { message: 'La calle es requerida' }).optional(),
+        number: z.string().trim().min(1, { message: 'El número es requerido' }).optional(),
+        postal: z.string().trim().min(1, { message: 'El código postal es requerido' }).optional(),
+        city: z.string().trim().min(1, { message: 'La ciudad es requerida' }).optional(),
+        province: z.string().trim().min(1, { message: 'La provincia es requerida' }).optional()
+    }).optional(),
 });
 
 /**

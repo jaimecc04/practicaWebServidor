@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { minLength } from "zod";
 
 const addressSchema = new mongoose.Schema({
     street: String,
@@ -20,7 +21,9 @@ const userSchema = new mongoose.Schema({
     password: { //Cifrada con bcrypt
 
         type: String,
-        required: true
+        required: true,
+        minLength: 8,
+        select: false // No se devuelve por defecto en las consultas
     },
     name: { // Nombre del usuario
         type: String,

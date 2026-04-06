@@ -362,7 +362,7 @@ export const logoutUser = async (req, res) => {
  */
 export const updateUserOnboarding = async (req, res) => {
     try {
-      const { name, lastName, nif } = req.body;
+      const { name, lastName, nif, address } = req.body;
 
       // Usuario viene del authMiddleware, por lo que req.user._id es el ID del usuario autenticado
       const user = await User.findById(req.user._id);
@@ -380,6 +380,8 @@ export const updateUserOnboarding = async (req, res) => {
       user.name = name;
       user.lastName = lastName;
       user.nif = nif;
+      user.address = address;
+
       await user.save();
 
       return res.json({
@@ -462,7 +464,7 @@ export const updateCompanyOnboarding = async (req, res) => {
         owner: user._id,
         name: `${user.name} ${user.lastName}`.trim(),
         cif: user.nif,
-        address: user.address || {},
+        address: user.address,
         isFreelance: true
       });
 
