@@ -651,8 +651,9 @@ export const getUser = async (req, res) => {
 };
 
 /**
-* 
-*/export const deleteUser = async (req, res) => {
+* Eliminar usuario (soft delete o hard delete)
+*/
+export const deleteUser = async (req, res) => {
   try {
     const { soft } = req.query;
 
@@ -695,8 +696,6 @@ export const getUser = async (req, res) => {
         }
       });
     }
-
-    // Comprobación previa hard delete
 
     // Hard delete
     user = await User.findByIdAndDelete(req.user._id);
