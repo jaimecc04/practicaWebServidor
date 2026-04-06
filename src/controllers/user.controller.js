@@ -5,6 +5,7 @@ import { generateAccessToken, generateRefreshToken, getRefreshTokenExpiry } from
 import { encrypt } from '../utils/handlePassword.js';
 import { AppError } from '../utils/AppError.js';
 import { compare } from '../utils/handlePassword.js';
+import { notificationEmitter } from '../services/notification.service.js';
 
 /**
  * Registrar nuevo usuario.
@@ -48,6 +49,12 @@ export const registerUser = async (req, res) => {
             user: user._id,
             expiresAt: getRefreshTokenExpiry(),
             createdByIp: req.ip
+        });
+
+        // Evento usuario registrado
+        notificationEmitter.emit('user:registered', {
+            email: user.email,
+            code: user.verificationCode
         });
 
         // Devolver tokens y datos del usuario
@@ -141,7 +148,13 @@ export const validateUserEmail = async (req, res) => {
     user.status = 'verified';
     user.verificationCode = null;
     user.verificationAttempts = 0;
+    
     await user.save();
+
+    // Evento usuario verificado
+    notificationEmitter.emit('user:verified', {
+      email: user.email
+    });
 
     return res.status(200).json({
       ok: true,
