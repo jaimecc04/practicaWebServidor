@@ -7,7 +7,7 @@ import { AppError } from '../utils/AppError.js';
 import { compare } from '../utils/handlePassword.js';
 import { notificationEmitter } from '../services/notification.service.js';
 import e from 'express';
-import { th } from 'zod/v4/locales';
+import { ca, id, th } from 'zod/v4/locales';
 
 /**
  * Registrar nuevo usuario.
@@ -651,32 +651,98 @@ export const getUser = async (req, res) => {
 };
 
 /**
- * Eliminar usuario por email (solo para pruebas)
- */
-export const deleteUserByEmail = async (req, res) => {
+* 
+*/export const deleteUser = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { soft } = req.query;
 
-    const user = await User.findOneAndDelete({ email });
+    console.log('--- DELETE USER ---');
+    console.log('req.query.soft:', soft);
+    console.log('req.user:', req.user);
+    console.log('req.user._id:', req.user?._id);
 
-    if (!user) {
-      return res.status(404).json({
-        error: true,
-        message: 'Usuario no encontrado'
+    let user = null;
+
+    // Soft delete
+    if (soft === 'true') {
+      user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          deleted: true,
+          deletedAt: new Date()
+        },
+        { returnDocument: 'after' }
+      );
+
+      console.log('Usuario tras soft delete:', user);
+
+      if (!user) {
+        const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
+
+        return res.status(err.statusCode).json({
+          error: true,
+          message: err.message,
+          code: err.code
+        });
+      }
+
+      // Evento usuario eliminado
+      notificationEmitter.emit('user:deleted', {
+        email: user.email,
+        type: 'soft'
+      });
+
+      return res.status(200).json({
+        message: 'Usuario eliminado lógicamente (soft delete)',
+        data: {
+          id: user._id,
+          email: user.email,
+          deleted: user.deleted,
+          deletedAt: user.deletedAt
+        }
       });
     }
 
-    // Eliminar también los refresh tokens
-    await RefreshToken.deleteMany({ user: user._id });
+    // Comprobación previa hard delete
+    const existingUser = await User.findById(req.user._id);
+    console.log('Usuario encontrado antes del hard delete:', existingUser);
 
-    return res.json({
-      error: false,
-      message: 'Usuario y tokens eliminados correctamente'
+    // Hard delete
+    user = await User.findByIdAndDelete(req.user._id);
+    console.log('Usuario eliminado en hard delete:', user);
+
+    if (!user) {
+      const err = AppError.notFound('Usuario', 'USER_NOT_FOUND');
+
+      return res.status(err.statusCode).json({
+        error: true,
+        message: err.message,
+        code: err.code
+      });
+    }
+
+    // Evento usuario eliminado
+    notificationEmitter.emit('user:deleted', {
+      email: user.email,
+      type: 'hard'
+    });
+
+    return res.status(200).json({
+      message: 'Usuario eliminado permanentemente (hard delete)',
+      data: {
+        id: user._id,
+        email: user.email
+      }
     });
   } catch (error) {
-    return res.status(500).json({
+    console.log(error);
+
+    const err = AppError.internal('Error al eliminar el usuario', 'DELETE_USER_ERROR');
+
+    return res.status(err.statusCode).json({
       error: true,
-      message: 'Error al eliminar usuario'
+      message: err.message,
+      code: err.code
     });
   }
 };

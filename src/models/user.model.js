@@ -70,6 +70,10 @@ const userSchema = new mongoose.Schema({
     deleted: { // Soft delete
         type: Boolean,
         default: false
+    },
+    deletedAt: { // Fecha de eliminación (soft delete)
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true,

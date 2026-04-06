@@ -8,7 +8,8 @@ import {
     updateUserOnboarding,
     updateCompanyOnboarding,
     uploadLogo,
-    getUser
+    getUser,
+    deleteUser
 } from '../controllers/user.controller.js';
 import { 
     registerUserSchema, 
@@ -23,7 +24,6 @@ import { authMiddleware } from '../middleware/auth.middleware.js';
 import uploadMiddleware from '../middleware/upload.middleware.js';
 import { checkUserHasCompany } from '../middleware/company.middleware.js';
 
-import { deleteUserByEmail } from '../controllers/user.controller.js';
 
 const router = Router();
 
@@ -45,10 +45,7 @@ router.patch('/company', authMiddleware, validateBody(companyOnboardingSchema), 
 router.patch('/logo', authMiddleware, checkUserHasCompany,uploadMiddleware.single('logo'), uploadLogo);
 // GET /api/user
 router.get('/', authMiddleware, getUser);
-
-
-
-// DELETE /api/user/test-delete
-router.delete('/test-delete', deleteUserByEmail);
+// DELETE /api/user
+router.delete('/', authMiddleware, deleteUser);
 
 export default router;
