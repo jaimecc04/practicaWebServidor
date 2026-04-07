@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { is } from 'zod/v4/locales';
 
 /**
  * Schema de validación para el registro de usuarios.

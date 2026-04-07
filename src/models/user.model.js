@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { minLength } from "zod";
 
 const addressSchema = new mongoose.Schema({
     street: String,

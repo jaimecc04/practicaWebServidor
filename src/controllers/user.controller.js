@@ -474,7 +474,7 @@ export const updateCompanyOnboarding = async (req, res) => {
       await user.save();
 
       return res.status(200).json({
-        message: 'Compañía de autónomo creada orrectamente',
+        message: 'Compañía de autónomo creada correctamente',
         data: {
           company: freelanceCompany,
           user: {
@@ -556,7 +556,7 @@ export const updateCompanyOnboarding = async (req, res) => {
 
 
 /**
- * Subir logo de la empresa (solo para usuarios admin)
+ * Subir logo de la empresa
  */
 export const uploadLogo = async (req, res) => {
   try {

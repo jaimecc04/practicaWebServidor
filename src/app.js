@@ -1,5 +1,6 @@
  // Configuracion express
 import express from 'express';
+import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { join } from 'node:path';
@@ -12,6 +13,12 @@ const app = express();
 
 // Seguridad básica con Helmet
 app.use(helmet());
+
+// Cors
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
 // Rate limit global
 const limiter = rateLimit({
