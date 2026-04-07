@@ -3,6 +3,3 @@ node_modules/
 
 # variables entorno
 .env
-
-# pruebas
-test/

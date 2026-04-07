@@ -1,0 +1,153 @@
+@baseURL = http://localhost:3000
+
+### Prueba health
+GET {{baseURL}}/health
+
+### Registrar usuario
+POST {{baseURL}}/api/user/register
+Content-Type: application/json
+
+{
+    "email": "jaime10@example.com",
+    "password": "Password.123"
+}
+
+### Validar email del usuario
+PUT {{baseURL}}/api/user/validation
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzZmFhNzg1YmEzYTY4ZDgxMjZmNGYiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU0OTk5NDMsImV4cCI6MTc3NTUwMDg0M30.xlq2kboLcrpSPGhD5vtSOpBYOMmRD8ELXOBhC182A5U
+Content-Type: application/json
+
+{
+    "code": "948424"
+}
+
+### Login de usuario
+POST {{baseURL}}/api/user/login
+Content-Type: application/json
+
+{
+    "email": "jaime@example.com",
+    "password": "Password.123"
+}
+
+
+### Refresh token
+POST {{baseURL}}/api/user/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "75f9a2bc2ed466e455d3fa8e2f18f60dab64f0b36b439612d38dfa07710037cb65297a126e151b4bc596b7914473e33f552bc1958aa09d26a8d3130d71595172"
+}
+
+### Logout de usuario
+POST {{baseURL}}/api/user/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzOGNiMzMwY2NlZmZjNGZiZDZhOWIiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU0OTM3MTUsImV4cCI6MTc3NTQ5NDYxNX0.fOJvZfdgsSmo0PzzdpsaCFGImxjiI10o_fCmyJk72h8
+Content-Type: application/json
+
+{
+    "refreshToken": "75f9a2bc2ed466e455d3fa8e2f18f60dab64f0b36b439612d38dfa07710037cb65297a126e151b4bc596b7914473e33f552bc1958aa09d26a8d3130d71595172"
+}
+
+### Añadir datos de onboarding
+PUT {{baseURL}}/api/user/register
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzZTU2MTliNTM4YzQzNzgzNzc1M2MiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU0OTQ1NDYsImV4cCI6MTc3NTQ5NTQ0Nn0.ModlKM4D3ZhHZ4v6S6sKd4UtfFiBDCohZM-H6mZrbLk
+Content-Type: application/json
+
+{
+    "name": "Jaime3",
+    "lastName": "Castellano Cubells",
+    "nif": "12345678A"
+}
+
+### Crear nueva compañía (no existe CIF)
+PATCH {{baseURL}}/api/user/company
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzOGNiMzMwY2NlZmZjNGZiZDZhOWIiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU0OTM3MTUsImV4cCI6MTc3NTQ5NDYxNX0.fOJvZfdgsSmo0PzzdpsaCFGImxjiI10o_fCmyJk72h8
+Content-Type: application/json
+
+{
+    "name": "Empresa de Jaime",
+    "cif": "B12345678",
+    "address": {
+        "street": "Calle Falsa",
+        "number": "123",
+        "postal": "28080",
+        "city": "Madrid",
+        "province": "Madrid"
+    },
+    "isFreelance": false
+}
+
+
+### Unirse a empresa ya existente
+PATCH {{baseURL}}/api/user/company
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzZTQwZjliNTM4YzQzNzgzNzc1MjUiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU0OTQyMzQsImV4cCI6MTc3NTQ5NTEzNH0.oYK-HDFbjaCLt5kWGq5myreL0uOOgH_VBh_46WxDpjo
+Content-Type: application/json
+
+{
+    "name": "Empresa de Jaime",
+    "cif": "B12345678",
+    "address": {
+        "street": "Otra calle",
+        "number": "5",
+        "postal": "28002",
+        "city": "Madrid",
+        "province": "Madrid"
+    },
+    "isFreelance": false
+}
+
+### Crear compañía de autónomo (cif igual al nif del usuario)
+PATCH {{baseURL}}/api/user/company
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzZTU2MTliNTM4YzQzNzgzNzc1M2MiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU0OTQ1NDYsImV4cCI6MTc3NTQ5NTQ0Nn0.ModlKM4D3ZhHZ4v6S6sKd4UtfFiBDCohZM-H6mZrbLk
+Content-Type: application/json
+
+{
+    "isFreelance": true
+}
+
+### Subir logo de la compañía
+PATCH {{baseURL}}/api/user/logo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzOGNiMzMwY2NlZmZjNGZiZDZhOWIiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU1MDA4MjAsImV4cCI6MTc3NTUwMTcyMH0.mGJKy_341Fm5_Is0Rgl81ZyEOgITLNCLpYYnoZN3T0k
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="logo"; filename="logo.jpg"
+Content-Type: image/jpeg
+
+< ./logo1.jpg
+--boundary--
+
+### Obtener datos del usuario
+GET {{baseURL}}/api/user
+Authorization: Bearer yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQ0MjlmYzVlNGUzYzA5MjljYjY0OTMiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU1MTIwNjAsImV4cCI6MTc3NTUxMjk2MH0.T9GMXTF5DDLG5WR98D0iv25AaZDxJ7HGQb8PG039f8Q
+
+### Eliminar usuario Soft Delete
+DELETE {{baseURL}}/api/user?soft=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQ0MmI4NjQ2ZjlkYTRlNDI5NThkNzIiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU1MTI0NTQsImV4cCI6MTc3NTUxMzM1NH0.rlmlgtk739qZmX8Ln1CsHc4nHR5O6z2TvjyNzVB3dgo
+
+### Eliminar usuario Hard Delete
+DELETE {{baseURL}}/api/user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQ1MDA1ZTU5MzcyNGYzNTY0NmQ4ZmEiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU1NjY5NDIsImV4cCI6MTc3NTU2Nzg0Mn0.MX81cOEVmeFFWkeMPASuedew4cdsSglpt-tcKmERsbU
+
+### Actualizar contraseña
+PUT {{baseURL}}/api/user/password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzOGNiMzMwY2NlZmZjNGZiZDZhOWIiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU1MTI5NDAsImV4cCI6MTc3NTUxMzg0MH0.agSXT8J0TBdtYm6SRPpd8IeRg01XPJu9t6QqW9JjzeI
+Content-Type: application/json
+
+{
+    "currentPassword": "Pass.123",
+    "newPassword": "Password.123"
+}
+
+### Invitar usuario
+POST {{baseURL}}/api/user/invite
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWQzOGNiMzMwY2NlZmZjNGZiZDZhOWIiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU1MTU0NjIsImV4cCI6MTc3NTUxNjM2Mn0.VAOMyXr7GNF2Dzg1Tzh6GiAxhnX2dXk6R5YuH1_m8jM
+Content-Type: application/json
+
+{
+    "email": "jaime-invitado2@example.com",
+    "password": "Password.123",
+    "name": "Jaime-Invitado",
+    "lastName": "Castellano",
+    "nif": "12345678Z"
+}
