@@ -6,6 +6,7 @@ import { encrypt } from '../utils/handlePassword.js';
 import { AppError } from '../utils/AppError.js';
 import { compare } from '../utils/handlePassword.js';
 import { notificationEmitter } from '../services/notification.service.js';
+import { sendSlackNotification } from '../utils/handleLogger.js';
 
 /**
  * Registrar nuevo usuario.
@@ -57,6 +58,15 @@ export const registerUser = async (req, res) => {
             code: user.verificationCode
         });
 
+        // Log a Slack
+        try{
+          await sendSlackNotification(
+            `Usuario registrado: ${user.email} | status: ${user.status} | role: ${user.role} | ip: ${req.ip}`
+          );
+        } catch (slackError){
+          console.error('Error enviando log a Slack:', slackError.message);
+        }
+
         // Devolver tokens y datos del usuario
         return res.status(201).json({
             message: 'Usuario registrado correctamente.',
@@ -70,6 +80,14 @@ export const registerUser = async (req, res) => {
         });
     } catch (error) {
         console.error('Error al registrar usuario:', error);
+
+        try {
+          await sendSlackNotification(
+            `Error en registerUser: ${error.message} | email: ${req.body?.email || 'sin email'} | ip: ${req.ip}`
+          );
+        } catch (slackError) {
+          console.error('Error enviando error a Slack:', slackError.message);
+        }
         return res.status(500).json({
             error: true,
             message: 'Error al registrar usuario'
