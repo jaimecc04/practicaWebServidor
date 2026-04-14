@@ -4,6 +4,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { join } from 'node:path';
+import morganBody from 'morgan-body';
+import { loggerStream } from './utils/handleLogger.js';
 
 import apiRouter from './routes/index.js';
 import { notFound, errorHandler } from './middleware/error.middleware.js';
@@ -52,6 +54,13 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
+});
+
+// Slack
+morganBody(app, {
+  noColors: true,
+  skip: (req, res) => res.statusCode < 400, // Solo errores
+  stream: loggerStream
 });
 
 // Rutas
