@@ -8,7 +8,7 @@ POST {{baseURL}}/api/user/register
 Content-Type: application/json
 
 {
-    "email": "jaime10@example.com",
+    "email": "jaime@example.com",
     "password": "Password.123"
 }
 
