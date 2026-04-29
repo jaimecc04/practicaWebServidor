@@ -50,7 +50,7 @@ cp .env.example .env
 4. Configurar variables de entorno:
 
 PORT=3000
-MONGO_URI=mongodb://localhost:27017/practica
+DB_URI=mongodb://localhost:27017/practica
 JWT_SECRET=tu_secreto_super_seguro
 JWT_EXPIRES_IN=2h
 
@@ -75,9 +75,9 @@ http://localhost:3000
 La API usa JWT.
 
 1. Registro
-POST /api/auth/register
+POST /api/user/register
 2. Login
-POST /api/auth/login
+POST /api/user/login
 
 Respuesta:
 
@@ -97,8 +97,8 @@ Authorization: Bearer <token>
 # Endpoints principales
 
 1. Usuario
-GET /api/user/me → Obtener perfil
-PATCH /api/user → Actualizar usuario
+GET /api/user → Obtener perfil
+PUT /api/user/register → Actualizar usuario
 DELETE /api/user → Eliminar usuario (soft/hard)
 PATCH /api/user/password → Cambiar contraseña
 
