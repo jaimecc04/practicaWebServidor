@@ -2,12 +2,10 @@ import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const ACCESS_TOKEN_EXPIRES = process.env.JWT_EXPIRES_IN || '15m';  // Corto
-const REFRESH_TOKEN_DAYS = 7; // Largo
+const ACCESS_TOKEN_EXPIRES = process.env.JWT_EXPIRES_IN || '15m';
+const REFRESH_TOKEN_DAYS = 7;
 
-/**
- * Genera access token (corta duración)
- */
+
 export const generateAccessToken = (user) => {
   return jwt.sign(
     { 
@@ -21,9 +19,6 @@ export const generateAccessToken = (user) => {
   );
 };
 
-/**
- * Verifica access token
- */
 export const verifyAccessToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);
@@ -33,17 +28,10 @@ export const verifyAccessToken = (token) => {
   }
 };
 
-/**
- * Genera refresh token (larga duración)
- * Usa crypto para token opaco (no JWT)
- */
 export const generateRefreshToken = () => {
   return crypto.randomBytes(64).toString('hex');
 };
 
-/**
- * Calcula fecha de expiración del refresh token
- */
 export const getRefreshTokenExpiry = () => {
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + REFRESH_TOKEN_DAYS);

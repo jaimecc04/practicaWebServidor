@@ -1,10 +1,8 @@
 import multer from 'multer';
 import { extname, join } from 'node:path';
 
-// Node.js 20.11+ - forma moderna
 const __dirname = import.meta.dirname;
 
-// Configuración de almacenamiento
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = join(__dirname, '../../uploads');
@@ -17,7 +15,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// Filtro de tipos de archivo
 const fileFilter = (req, file, cb) => {
   const allowedMimes = [
     'image/jpg',
@@ -33,7 +30,6 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Middleware de upload
 const uploadLogoMiddleware = multer({
   storage,
   fileFilter,

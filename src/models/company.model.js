@@ -11,16 +11,16 @@ const addressSchema = new mongoose.Schema({
 );
 
 const companySchema = new mongoose.Schema({
-    owner: { // ref: 'user' -- admin que creó la compañía
+    owner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
     },
-    name: { // nombre de la empresa
+    name: {
         type: String,
         required: true,
     },
-    cif: { // CIF de la empresa
+    cif: {
         type: String,
         required: true,
         unique: true
@@ -29,15 +29,15 @@ const companySchema = new mongoose.Schema({
         type: addressSchema,
         default: {}
     },
-    logo: { // URL del logo de la empresa
+    logo: {
         type: String,
         default: ""
     },
-    isFreelance: { // true si es autónomo, (1 sola persona), false si es empresa (varios empleados)
+    isFreelance: {
         type: Boolean,
         default: false
     },
-    deleted: { // Soft delete
+    deleted: {
         type: Boolean,
         default: false
     }

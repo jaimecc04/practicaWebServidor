@@ -31,29 +31,17 @@ import { checkUserHasCompany } from '../middleware/company.middleware.js';
 
 const router = Router();
 
-// POST /api/user/register
 router.post('/register', validateBody(registerUserSchema), registerUser);
-// PUT /api/user/validation
 router.put('/validation', authMiddleware, validate(validateEmailCodeSchema), validateUserEmail);
-// POST /api/user/login
 router.post('/login', validateBody(loginUserSchema), loginUser);
-// POST /api/user/refresh
 router.post('/refresh', validateBody(refreshTokenSchema), refreshAccessToken);
-// POST /api/user/logout
 router.post('/logout', authMiddleware, validateBody(refreshTokenSchema), logoutUser);
-// PUT /api/user/register
 router.put('/register', authMiddleware, validateBody(onboardingUserSchema), updateUserOnboarding);
-// PATCH /api/user/company
 router.patch('/company', authMiddleware, validateBody(companyOnboardingSchema), updateCompanyOnboarding);
-// PATCH /api/user/logo
 router.patch('/logo', authMiddleware, checkUserHasCompany,uploadMiddleware.single('logo'), uploadLogo);
-// GET /api/user
 router.get('/', authMiddleware, getUser);
-// DELETE /api/user
 router.delete('/', authMiddleware, deleteUser);
-// PUT /api/user/password
 router.put('/password', authMiddleware, validateBody(updatePasswordSchema), updatePassword);
-// POST /api/user/invite
 router.post('/invite', authMiddleware, validateBody(inviteUserSchema), inviteUser);
 
 export default router;

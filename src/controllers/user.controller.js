@@ -8,14 +8,11 @@ import { compare } from '../utils/handlePassword.js';
 import { notificationEmitter } from '../services/notification.service.js';
 import { sendSlackNotification } from '../utils/handleLogger.js';
 
-/**
- * Registrar nuevo usuario.
- */
+
 export const registerUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Verificar si el email ya está registrado
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(409).json({
@@ -24,13 +21,10 @@ export const registerUser = async (req, res) => {
             });
         }
 
-        // Cifrar contraseña
         const hashedPassword = await encrypt(password);
         
-        // Generar código de verificación aleatorio de 6 dígitos
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
         
-        // Crear usuario
         const user = await User.create({
             email,
             password: hashedPassword,
@@ -40,11 +34,9 @@ export const registerUser = async (req, res) => {
             status: 'pending'
         });
 
-        // Generar tokens
         const accessToken = generateAccessToken(user);
         const refreshTokenValue = generateRefreshToken();
 
-        // Guardar refresh token en BD
         await RefreshToken.create({
             token: refreshTokenValue,
             user: user._id,
@@ -52,13 +44,11 @@ export const registerUser = async (req, res) => {
             createdByIp: req.ip
         });
 
-        // Evento usuario registrado
         notificationEmitter.emit('user:registered', {
             email: user.email,
             code: user.verificationCode
         });
 
-        // Log a Slack
         try{
           await sendSlackNotification(
             `Usuario registrado: ${user.email} | status: ${user.status} | role: ${user.role} | ip: ${req.ip}`
@@ -67,7 +57,6 @@ export const registerUser = async (req, res) => {
           console.error('Error enviando log a Slack:', slackError.message);
         }
 
-        // Devolver tokens y datos del usuario
         return res.status(201).json({
             message: 'Usuario registrado correctamente.',
             data: {
@@ -95,9 +84,6 @@ export const registerUser = async (req, res) => {
     }
 };
 
-/**
- * Validar email del usuario
- */
 export const validateUserEmail = async (req, res) => {
   try {
     const { code } = req.body;
@@ -169,7 +155,6 @@ export const validateUserEmail = async (req, res) => {
     
     await user.save();
 
-    // Evento usuario verificado
     notificationEmitter.emit('user:verified', {
       email: user.email
     });
@@ -190,17 +175,13 @@ export const validateUserEmail = async (req, res) => {
   }
 };
 
-/**
- * Iniciar sesión de usuario.
- */
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Buscar usuario por email incluyendo el campo de contraseña
+    // Incluir el campo de contraseña
     const user = await User.findOne({ email }).select('+password');
 
-    // Verificar si el usuario existe 
     if (!user) {
       const err = AppError.unauthorized('Credenciales incorrectas', 'INVALID_CREDENTIALS');
 
@@ -211,7 +192,6 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    // Comparar contraseña
     const isPasswordValid = await compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -224,7 +204,6 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    // Comprobar si el usuario está verificado
     if (user.status !== 'verified') {
       const err = AppError.forbidden('El usuario no está verificado', 'USER_NOT_VERIFIED');
 
@@ -235,11 +214,9 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    // Generar tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken();
 
-    // Guardar refresh token en BD
     await RefreshToken.create({
       token: refreshToken,
       user: user._id,
@@ -247,10 +224,8 @@ export const loginUser = async (req, res) => {
       createdByIp: req.ip
     });
 
-    // Ocultar la contraseña en la respuesta
     user.set('password', undefined, { strict: false });
 
-    // Responder con tokens y datos del usuario
     return res.json({
       accessToken,
       refreshToken,
@@ -268,10 +243,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-/**
- * Refrescar token de acceso.
-
- */
 export const refreshAccessToken = async (req, res) => {
     try {
         const { refreshToken } = req.body;
@@ -298,7 +269,6 @@ export const refreshAccessToken = async (req, res) => {
             });
         }
 
-        // Token revocado o expirado
         if (!storedToken.isActive()) {
             const err = AppError.unauthorized('Refresh token no válido o expirado', 'INVALID_OR_EXPIRED_REFRESH_TOKEN');
 
@@ -336,9 +306,6 @@ export const refreshAccessToken = async (req, res) => {
     }
 };
 
-/**
- * logout de usuario (revocar refresh token)
- */
 export const logoutUser = async (req, res) => {
     try {
         const { refreshToken } = req.body;
@@ -355,7 +322,6 @@ export const logoutUser = async (req, res) => {
             });
         }
 
-        // Revocar el token
         storedToken.revokedAt = new Date();
         storedToken.revokedByIp = req.ip;
         await storedToken.save();
@@ -375,14 +341,10 @@ export const logoutUser = async (req, res) => {
     }
 };
 
-/**
- * Completar onboarding de usuario (actualizar datos)
- */
 export const updateUserOnboarding = async (req, res) => {
     try {
       const { name, lastName, nif, address } = req.body;
 
-      // Usuario viene del authMiddleware, por lo que req.user._id es el ID del usuario autenticado
       const user = await User.findById(req.user._id);
 
       if (!user) {
@@ -394,7 +356,6 @@ export const updateUserOnboarding = async (req, res) => {
           });
       }
 
-      // Actualizar datos del usuario
       user.name = name;
       user.lastName = lastName;
       user.nif = nif;
@@ -425,9 +386,6 @@ export const updateUserOnboarding = async (req, res) => {
     }
 };
 
-/**
- * Completar onboarding de empresa (actualizar datos de la empresa en el onboarding)
- */
 export const updateCompanyOnboarding = async (req, res) => {
   try {
     const { name, cif, address, isFreelance } = req.body;
@@ -455,10 +413,8 @@ export const updateCompanyOnboarding = async (req, res) => {
         });
       }
       
-      // Comprobar si ya existe una compañía de autónomo con el mismo NIF que el NIF del usuario
       const existingFreelanceCompany = await Company.findOne({ cif: user.nif });
 
-      // Si ya existe una compañía de autónomo con el mismo NIF, asignar el usuario a esa compañía como guest
       if(existingFreelanceCompany) {
         user.company = existingFreelanceCompany._id;
         user.role = 'guest';
@@ -554,7 +510,6 @@ export const updateCompanyOnboarding = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    // Manejar error de clave duplicada (código 11000) al crear una compañía con un CIF que ya existe
     if (error.code === 11000) {
       return res.status(409).json({
         error: true,
@@ -572,10 +527,6 @@ export const updateCompanyOnboarding = async (req, res) => {
     }
 };
 
-
-/**
- * Subir logo de la empresa
- */
 export const uploadLogo = async (req, res) => {
   try {
     if(!req.file) {
@@ -597,7 +548,6 @@ export const uploadLogo = async (req, res) => {
       });
     }
 
-    // Buscar la compañía
     const company = await Company.findById(req.user.company);
 
     if(!company) {
@@ -634,10 +584,6 @@ export const uploadLogo = async (req, res) => {
   }
 };
 
-/**
- * Obtener datos del usuario autenticado
-*/
-
 export const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('company');
@@ -666,16 +612,12 @@ export const getUser = async (req, res) => {
   }
 };
 
-/**
-* Eliminar usuario (soft delete o hard delete)
-*/
 export const deleteUser = async (req, res) => {
   try {
     const { soft } = req.query;
 
     let user = null;
 
-    // Soft delete
     if (soft === 'true') {
       user = await User.findByIdAndUpdate(
         req.user._id,
@@ -696,7 +638,6 @@ export const deleteUser = async (req, res) => {
         });
       }
 
-      // Evento usuario eliminado
       notificationEmitter.emit('user:deleted', {
         email: user.email,
         type: 'soft'
@@ -713,7 +654,6 @@ export const deleteUser = async (req, res) => {
       });
     }
 
-    // Hard delete
     user = await User.findByIdAndDelete(req.user._id);
 
     if (!user) {
@@ -726,7 +666,6 @@ export const deleteUser = async (req, res) => {
       });
     }
 
-    // Evento usuario eliminado
     notificationEmitter.emit('user:deleted', {
       email: user.email,
       type: 'hard'
@@ -750,9 +689,6 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-/**
- * Cambiar cotraseña del usuario
- */
 export const updatePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -801,14 +737,10 @@ export const updatePassword = async (req, res) => {
   }
 };
 
-/**
- * Invitar compañeros
- */
 export const inviteUser = async (req, res) => {
   try {
     const { email, password, name, lastName, nif } = req.body;
 
-    // Solo admin puede invitar
     if(req.user.role !== 'admin'){
       const err = AppError.forbidden('No tienes permisos para invitar usuarios', 'FORBIDDEN');
 
@@ -819,7 +751,6 @@ export const inviteUser = async (req, res) => {
       });
     }
 
-    // Debe tener compañía asociada
     if (!req.user.company) {
       const err = AppError.badRequest(
         'El usuario no tiene una compañía asociada',
@@ -833,7 +764,6 @@ export const inviteUser = async (req, res) => {
       });
     }
 
-    // No permitir emails repetidos
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -849,13 +779,10 @@ export const inviteUser = async (req, res) => {
       });
     }
 
-    // Cifrar contraseña
     const hashedPassword = await encrypt(password, 10);
 
-    // Generar código de verificación de 6 dígitos
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Crear usuario invitado
     const invitedUser = await User.create({
       email,
       password: hashedPassword,
@@ -869,7 +796,6 @@ export const inviteUser = async (req, res) => {
       company: req.user.company
     });
 
-    // Emitir evento
     notificationEmitter.emit('user:invited', {
       email: invitedUser.email,
       company: invitedUser.company,

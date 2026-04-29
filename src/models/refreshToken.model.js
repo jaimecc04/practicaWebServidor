@@ -1,29 +1,28 @@
 import mongoose from "mongoose";
 
 const refreshTokenSchema = new mongoose.Schema({
-    token: { // Token JWT de refresco
+    token: {
         type: String,
         required: true,
         unique: true
     },
-    user: { // Referencia al usuario propietario del token
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    expiresAt: { // Fecha de expiración del token
+    expiresAt: {
         type: Date,
         required: true,
-        index: { expires: 0 } // El token se eliminará automáticamente al expirar
+        index: { expires: 0 }
     },
-    createdByIp: String, // IP desde la que se creó el token
-    revokedAt: Date, // Fecha de revocación del token
-    revokedByIp: String // IP desde la que se revocó el token
+    createdByIp: String,
+    revokedAt: Date,
+    revokedByIp: String
 }, {
-    timestamps: true // Agrega createdAt y updatedAt automáticamente
+    timestamps: true
 });
 
-// Método para verificar si el token está activo (no revocado y no expirado)
 refreshTokenSchema.methods.isActive = function() {
     return !this.revokedAt && this.expiresAt > new Date();
 };

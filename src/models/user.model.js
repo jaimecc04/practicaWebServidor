@@ -11,52 +11,52 @@ const addressSchema = new mongoose.Schema({
 );
 
 const userSchema = new mongoose.Schema({
-    email: { // Único (index: unique), validado con Zod
+    email: {
         type: String,
         required: true,
         unique: true,
         lowercase: true
     },
-    password: { //Cifrada con bcrypt
+    password: {
 
         type: String,
         required: true,
         minLength: 8,
-        select: false // No se devuelve por defecto en las consultas
+        select: false
     },
-    name: { // Nombre del usuario
+    name: {
         type: String,
         default: ""
     },
-    lastName: { // Apellidos del usuario
+    lastName: {
         type: String,
         default: ""
     },
-    nif: { // NIF del usuario
+    nif: {
         type: String,
         default: ""
     },
-    role: { // Por defecto "admin", puede ser "admin" o "guest"
+    role: {
         type: String,
         enum: ["admin", "guest"],
         default: "admin",
         index: true
     },
-    status: { // Estado de verificación del usuario, por defecto "pending", puede ser "pending" o "verified"
+    status: {
         type: String,
         enum: ["pending", "verified"],
         default: "pending",
         index: true
     },
-    verificationCode: { // Código aleatorio de 6 dígitos para verificar el email del usuario, se genera al crear el usuario y se borra al verificarlo
+    verificationCode: {
         type: String,
         default: ""
     },
-    verificationAttempts: { // Número de intentos de verificación restantes
+    verificationAttempts: {
         type: Number,
         default: 3
     },
-    company: { // ref: 'Company' — se asigna en el onboarding (index)
+    company: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Company",
         default: null,
@@ -66,11 +66,11 @@ const userSchema = new mongoose.Schema({
         type: addressSchema,
         default: {}
     },
-    deleted: { // Soft delete
+    deleted: {
         type: Boolean,
         default: false
     },
-    deletedAt: { // Fecha de eliminación (soft delete)
+    deletedAt: {
         type: Date,
         default: null
     }

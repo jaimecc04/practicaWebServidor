@@ -8,7 +8,6 @@ export class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
   
-  // Factory methods para errores comunes
   static badRequest(message = 'Solicitud inválida', code = 'BAD_REQUEST') {
     return new AppError(message, 400, code);
   }

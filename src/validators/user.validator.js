@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Schema de validación para el registro de usuarios.
- */
 export const registerUserSchema = z.object({
     email: z
         .string()
@@ -18,9 +15,6 @@ export const registerUserSchema = z.object({
         .regex(/[@$!%*?&,._-]/, { message: 'La contraseña debe contener al menos un carácter especial (@$!%*?&,._-)' })
 });
 
-/**
- * Schema de validación de la solicitud para enviar el código de verificación por email.
- */
 export const validateEmailCodeSchema = z.object({
     body: z.object({
         code: z
@@ -29,9 +23,6 @@ export const validateEmailCodeSchema = z.object({
     })
 });
 
-/**
- * Schema de validación para el inicio de sesión de usuarios.
- */
 export const loginUserSchema = z.object({
   email: z
     .string()
@@ -44,18 +35,12 @@ export const loginUserSchema = z.object({
     .min(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
 });
 
-/**
- * Schema de validación para la solicitud de refresh token. También se utiliza en el logout para revocar el token de refresh.
- */
 export const refreshTokenSchema = z.object({
     refreshToken: z 
         .string()
         .min(1, { message: 'El refresh token es requerido' })
 });
 
-/**
- * Schema de validación para completar el onboarding de usuario (actualizar datos)
- */
 export const onboardingUserSchema = z.object({
     name: z
         .string()
@@ -82,10 +67,6 @@ export const onboardingUserSchema = z.object({
         province: z.string().trim().min(1, { message: 'La provincia es requerida' }).optional()
     }).optional(),
 });
-
-/**
- * Schema de validación para el onboarding de empresa (actualizar datos de la empresa en el onboarding)
- */
 
 export const companyOnboardingSchema = z.object({
     name: z

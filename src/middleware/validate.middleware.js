@@ -1,10 +1,7 @@
 import mongoose from 'mongoose';
 import { ZodError } from 'zod';
 
-/**
- * Middleware de validación con Zod
- * Valida body, query y params según el esquema proporcionado. Si la validación falla, devuelve un error 400 con los detalles de los errores.
- */
+
 export const validate = (schema) => (req, res, next) => {
   try {
     const parsed = schema.parse({
@@ -35,10 +32,6 @@ export const validate = (schema) => (req, res, next) => {
   }
 };
 
-/**
- * Middleware para validar solo body
- * usado en endpoints POST/PUT/PATCH
- */
 export const validateBody = (schema) => (req, res, next) => {
   try {
     req.body = schema.parse(req.body);
