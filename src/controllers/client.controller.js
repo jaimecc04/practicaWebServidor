@@ -7,7 +7,13 @@ export const createClient = async (req, res) => {
         const companyId = req.user.company;
 
         if (!companyId) {
-            throw new AppError('El usuario no pertenece a ninguna empresa', 'NO_COMPANY');
+            const err =  AppError.badRequest('El usuario no pertenece a ninguna empresa', 'NO_COMPANY');
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
+        
         }
 
         const { cif } = req.body;
@@ -15,7 +21,12 @@ export const createClient = async (req, res) => {
         const existingClient = await Client.findOne({ cif, company: companyId, deleted: false });
 
         if (existingClient) {
-            throw new AppError('Ya existe un cliente con ese CIF en la empresa', 'CLIENT_EXISTS');
+            const err =  AppError.conflict('Ya existe un cliente con ese CIF en la empresa', 'CLIENT_EXISTS');
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
         }
 
         const client = new Client({
@@ -28,7 +39,8 @@ export const createClient = async (req, res) => {
 
         res.status(201).json({ 
             message: 'Cliente creado correctamente',
-            data: client });
+            data: client 
+        });
     
     } catch (error) {
         console.error('Error creando cliente:', error);
