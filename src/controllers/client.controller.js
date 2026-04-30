@@ -107,3 +107,44 @@ export const getClients = async (req, res) => {
         });
     }
 };
+
+export const getClientById = async (req, res) => {
+    try {
+        const companyId = req.user.company;
+        const { id } = req.params;
+
+        if (!companyId) {
+            const err =  AppError.badRequest('El usuario no pertenece a ninguna empresa', 'NO_COMPANY');
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
+        }
+
+        const client = await Client.findOne({ _id: id, company: companyId, deleted: false });
+
+        if (!client) {
+            const err =  AppError.notFound('Cliente no encontrado', 'CLIENT_NOT_FOUND');
+            return res.status(err.statusCode).json({
+                error: true,
+                message: err.message,
+                code: err.code
+            });
+        }
+
+        res.json({ 
+            data: client
+        });
+
+    } catch (error) {
+        console.error('Error obteniendo cliente por ID:', error);
+
+        const err = AppError.internal('Error al obtener el cliente', 'GET_CLIENT_ERROR');
+        return res.status(err.statusCode).json({
+            error: true,
+            message: err.message,
+            code: err.code
+        });
+    }
+};

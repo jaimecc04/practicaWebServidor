@@ -42,3 +42,11 @@ export const getClientsSchema = z.object({
         search: z.string().optional()
     })
 });
+
+export const getClientByIdSchema = z.object({
+    params: z.object({
+        id: z
+            .string()
+            .length(24, 'El ID debe ser un ObjectId válido')
+    })
+});
