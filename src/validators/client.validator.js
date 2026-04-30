@@ -34,3 +34,11 @@ export const createClientSchema = z.object({
         }),
     })
 });
+
+export const getClientsSchema = z.object({
+    query: z.object({
+        page: z.coerce.number().int().positive().optional(),
+        limit: z.coerce.number().int().positive().optional(),
+        search: z.string().optional()
+    })
+});
