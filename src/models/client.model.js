@@ -39,6 +39,7 @@ const clientSchema = new mongoose.Schema({
             city: String,
             province: String
         },
+        _id: false,
         default: {}
     },
     deleted: {
